@@ -1,5 +1,7 @@
-let mysql = require("mysql");
-let inquirer = require("inquirer");
+const mysql = require("mysql");
+const inquirer = require("inquirer");
+const Table = require("cli-table");
+
 
 //Sets mysql database to a variable
 var connection = mysql.createConnection({
@@ -20,14 +22,27 @@ connection.connect(function (err) {
 });
 
 function displayItems() {
-    var query = "Select * FROM products";
+    var query = "Select item_id, product_name, price FROM products";
     connection.query(query, function (err, res) {
 
         if (err) throw err;
 
+        var table = new Table({
+            head: ["ID", "Product Name", "Price"],
+            style: {
+                head: ['blue'],
+                compact: false,
+                colAligns: ["center"],
+            }
+        });
+
         for (var i = 0; i < res.length; i++) {
-            console.log("ID: " + res[i].item_id + " || Product Name: " + res[i].product_name + " || Price: " + res[i].price);
+            table.push(
+                [res[i].item_id, res[i].product_name, res[i].price]
+            );
         }
+
+        console.log(table.toString());
 
         buyItem();
     })
@@ -39,7 +54,7 @@ function displayItems() {
 function buyItem() {
     inquirer.prompt([
         {
-            name: "item_id",
+            name: "productId",
             type: "input",
             message: "Please enter the id of the item you wish to purchase.",
             validate: function (value) {
@@ -64,44 +79,48 @@ function buyItem() {
             }
         }]).then(function (answer) {
 
-            let item = input.item_id;
-            let quantity = input.quantity;
+            const queryStr = "Select stock_quantity, price, department_name FROM products WHERE ?";
 
-            const queryStr = "Select * FROM products WHERE ?";
+            connection.query(queryStr, { item_id: answer.productId }, function (err, res) {
 
-            connection.query(queryStr, { item_id: item }, function (err, data) {
+                if (err) throw err;
 
-                if (err) {
-                    throw err;
-                } else if (data.length === 0) {
-                    console.log("Invalid item ID. Please select a valid ID.");
-                    displayItems();
+                let availableStock = res[0].stock_quantity;
+                let price = res[0].price;
+                let department = res[0].department_name;
+
+                if (available_stock <= answer.quantity) {
+
+                    completePurchase(availableStock, price, department, answer.productId, answer.quantity);
+
                 } else {
 
-                    let itemData = data[0];
+                    console.log("Sorry! Insufficient stock.");
+                    console.log("Please modify your order.")
 
-                    if (quantity <= itemData.stock_quantity) {
-                        console.log("Order was placed!");
-
-                        var updateQueryStr = "UPDATE products SET stock_quantity = " + (itemData.stock_quantity - quantity) + "WHERE item_id = " + item;
-
-                        connection.query(updateQueryStr, function(err,res){
-                            if (err){
-                                throw err;
-                            } else {
-                                console.log("Your total is $" + itemData.price * quantity);
-                                console.log("Thanks for shopping with us!")
-                            }
-                        })
-                    } else {
-                        console.log("Sorry! Insufficient stock.");
-                        console.log("Please modify your order.")
-
-                        displayItems();
-                    }
-
+                    displayItems();
                 }
 
-            })
-        })
+            });
+        });
 }
+
+// function completePurchase(availableStock, price, department, answer.productId, answer.quantity) {
+
+//     let updatedStock = availableStock - answer.quantity;
+//     let totalPrice = price * answer.quantity;
+//     //need to update total product sales too
+//     const query = "UPDATE products SET ? WHERE ?";
+
+//     connection.query(query, [{
+//         stock_quantity: updatedStock
+
+//     },{
+//         item_id: answer.productId
+//     }], function(err, res) {
+
+//         if (err) throw err
+
+//         console.log("Your purchase is complete.")
+//     });
+// }
