@@ -44,3 +44,15 @@ function showQuestions() {
         }
     });
 };
+
+function viewSales() {
+
+    const query = "SELECT department_id AS department_id, department_name AS department_name," + "over_head_costs AS over_head_costs, total_sales AS total_sales," + "(total_sales - over_head_costs) AS total_profit FROM departments";
+
+    connection.query(query, function(err,res){
+        if (err) throw err;
+
+        console.table(res);
+        showQuestions();
+    })
+}

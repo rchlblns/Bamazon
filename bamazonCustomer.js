@@ -78,7 +78,7 @@ function buyItem() {
             let quantity = userInput.quantity;
             
 
-            const query = "SELECT stock_quantity, price, department_name FROM products WHERE ?";
+            const query = "SELECT stock_quantity, product_name, department_name, price, product_sales FROM products WHERE ?";
 
             connection.query(query, {item_id: id}, function(err, res){
 
@@ -92,11 +92,15 @@ function buyItem() {
                 if (res[0].stock_quantity >= quantity) {
                     let total = (quantity * res[0].price).toFixed(2);
                     let updatedQuantity = res[0].stock_quantity - quantity;
+                    let productSales = res[0].price * quantity;
+                    let product = res[0].product_name;
                     
-                    console.log("Your total cost is " + total);
+                    console.log(`Success! You bought ${quantity} ${product}s. Your total cost is ${total}.`);
 
                     connection.query("UPDATE products SET ? WHERE ?", [{
-                        stock_quantity: updatedQuantity
+                        stock_quantity: updatedQuantity,
+                        product_sales: productSales
+
                     },
                     {
                         item_id: id
@@ -106,7 +110,7 @@ function buyItem() {
 
                     // connection.end();
                 } else {
-                    console.log("Insufficient quantity!")
+                    console.log("Insufficient quantity! Please choose another item.")
                 }
                 displayItems();
 
