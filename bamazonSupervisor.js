@@ -20,3 +20,27 @@ connection.connect(function (err) {
     //otherwise display items for sale
     showQuestions();
 });
+
+function showQuestions() {
+    inquirer.prompt([
+        {
+            type: "list",
+            name: "option",
+            message: "Welcome Bamazon Supervisor! What would you like to do?",
+            choices: [
+                "View Product Sales by Department",
+                "Create New Department"
+            ]
+        }
+    ]).then(function(input){
+        switch(input.option) {
+            case "View Product Sales by Department":
+            viewSales();
+            break;
+
+            case "Create New Department":
+            addDepartment();
+            break;
+        }
+    });
+};
