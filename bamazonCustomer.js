@@ -22,13 +22,13 @@ connection.connect(function (err) {
 });
 
 function displayItems() {
-    var query = "Select item_id, product_name, price FROM products";
+    var query = "Select item_id, product_name, department_name, price FROM products";
     connection.query(query, function (err, res) {
 
         if (err) throw err;
 
         var table = new Table({
-            head: ["ID", "Product Name", "Price"],
+            head: ["ID", "Product Name", "Department", "Price"],
             style: {
                 head: ['blue'],
                 compact: false,
@@ -38,7 +38,7 @@ function displayItems() {
 
         for (var i = 0; i < res.length; i++) {
             table.push(
-                [res[i].item_id, res[i].product_name, res[i].price]
+                [res[i].item_id, res[i].product_name, res[i].department_name, res[i].price]
             );
         }
 
@@ -47,14 +47,11 @@ function displayItems() {
         buyItem();
     })
 }
-// function checkInput() {
-//     var int = Number.isInteger(parseFloat(value));
-//     var sign
-// }
+
 function buyItem() {
     inquirer.prompt([
         {
-            name: "productId",
+            name: "product_id",
             type: "input",
             message: "Please enter the id of the item you wish to purchase.",
             validate: function (value) {
@@ -77,50 +74,46 @@ function buyItem() {
                     return false;
                 }
             }
-        }]).then(function (answer) {
+        }]).then(function (input) {
 
-            const queryStr = "Select stock_quantity, price, department_name FROM products WHERE ?";
+            let id = input.product_id;
+            let quantity = input.quantity;
+            
 
-            connection.query(queryStr, { item_id: answer.productId }, function (err, res) {
+            var query = "SELECT stock_quantity, price, department_name FROM products WHERE ?";
+
+            connection.query(query, {item_id: id}, function(err, res){
 
                 if (err) throw err;
 
-                let availableStock = res[0].stock_quantity;
-                let price = res[0].price;
-                let department = res[0].department_name;
-
-                if (available_stock <= answer.quantity) {
-
-                    completePurchase(availableStock, price, department, answer.productId, answer.quantity);
-
-                } else {
-
-                    console.log("Sorry! Insufficient stock.");
-                    console.log("Please modify your order.")
-
+                if (res.length === 0) {
+                    console.log("Item not found. Please enter a valid item number.");
                     displayItems();
                 }
 
-            });
+                if (res[0].stock_quantity >= quantity) {
+                    let total = (quantity * res[0].price).toFixed(2);
+                    let updatedQuantity = res[0].stock_quantity - quantity;
+                    
+                    console.log("Your total cost is " + total);
+
+                    connection.query("UPDATE products SET ? WHERE ?", [{
+                        stock_quantity: updatedQuantity
+                    },
+                    {
+                        item_id: id
+                    }], function(err,res){
+                        console.log("Database updated");
+                    });
+
+                    // connection.end();
+                } else {
+                    console.log("Insufficient quantity!")
+                }
+                displayItems();
+
+            })
+
+        
         });
 }
-
-// function completePurchase(availableStock, price, department, answer.productId, answer.quantity) {
-
-//     let updatedStock = availableStock - answer.quantity;
-//     let totalPrice = price * answer.quantity;
-//     //need to update total product sales too
-//     const query = "UPDATE products SET ? WHERE ?";
-
-//     connection.query(query, [{
-//         stock_quantity: updatedStock
-
-//     },{
-//         item_id: answer.productId
-//     }], function(err, res) {
-
-//         if (err) throw err
-
-//         console.log("Your purchase is complete.")
-//     });
-// }
