@@ -36,7 +36,7 @@ function displayItems() {
             }
         });
 
-        for (var i = 0; i < res.length; i++) {
+        for (let i = 0; i < res.length; i++) {
             table.push(
                 [res[i].item_id, res[i].product_name, res[i].department_name, res[i].price]
             );
@@ -74,10 +74,10 @@ function buyItem() {
                     return false;
                 }
             }
-        }]).then(function (input) {
+        }]).then(function (userInput) {
 
-            let id = input.product_id;
-            let quantity = input.quantity;
+            let id = userInput.product_id;
+            let quantity = userInput.quantity;
             
 
             const query = "SELECT stock_quantity, price, department_name FROM products WHERE ?";
