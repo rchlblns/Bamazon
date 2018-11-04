@@ -197,42 +197,19 @@ function addProduct() {
             }
 
         }]).then(function(userInput) {
-            connection.query("INSERT INTO product SET ?", {
+
+            console.log("Product added successfully!");
+
+            connection.query("INSERT INTO products SET ?", {
                 product_name: userInput.product_name,
                 department_name: userInput.department_name,
                 price: userInput.price,
                 stock_quantity: userInput.stock_quantity
             }, function(err, res) {
-                if (err) throw err,
+                if (err) throw err;
 
-                console.log("Product added successfully!");
-
-                addDepartment(userInput.department_name);
+                selectAction();
             });
+
         });    
-}
-
-function addDepartment(department) {
-    const query = "SELECT department_name FROM products";
-
-    connection.query(query, function(err,res) {
-        if (err) throw err;
-
-        for (let i = 0; i < res.length; i++) {
-            if (department === res[i].department_name) {
-                console.log("This department already exists, no need to add it.");
-            } else {
-
-                connection.query("INSERT INTO department_name SET ?", {
-                    department_name: department
-                }, function(err,res){
-                    if (err) throw err;
-                    console.log(department + " has been added.");
-
-                    selectAction();
-                });
-
-            }
-        }
-    })
 }
