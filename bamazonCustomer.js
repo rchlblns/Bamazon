@@ -4,7 +4,7 @@ const Table = require("cli-table");
 
 
 //Sets mysql database to a variable
-var connection = mysql.createConnection({
+const connection = mysql.createConnection({
     host: "localhost",
     port: 8889,
     user: "root",
@@ -22,12 +22,12 @@ connection.connect(function (err) {
 });
 
 function displayItems() {
-    var query = "Select item_id, product_name, department_name, price FROM products";
+    const query = "Select item_id, product_name, department_name, price FROM products";
     connection.query(query, function (err, res) {
 
         if (err) throw err;
 
-        var table = new Table({
+        const table = new Table({
             head: ["ID", "Product Name", "Department", "Price"],
             style: {
                 head: ['blue'],
@@ -80,7 +80,7 @@ function buyItem() {
             let quantity = input.quantity;
             
 
-            var query = "SELECT stock_quantity, price, department_name FROM products WHERE ?";
+            const query = "SELECT stock_quantity, price, department_name FROM products WHERE ?";
 
             connection.query(query, {item_id: id}, function(err, res){
 
