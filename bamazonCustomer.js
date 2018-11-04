@@ -57,8 +57,7 @@ function buyItem() {
             validate: function (value) {
                 if (isNaN(value) === false) {
                     return true;
-                }
-                else {
+                } else {
                     return false;
                 }
             }
@@ -69,8 +68,7 @@ function buyItem() {
             validate: function (value) {
                 if (isNaN(value) === false) {
                     return true;
-                }
-                else {
+                } else {
                     return false;
                 }
             }
