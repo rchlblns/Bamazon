@@ -1,9 +1,11 @@
+//modules
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 const Table = require("cli-table");
+const colors = require("colors");
 
 
-//Sets mysql database to a variable
+//sets mysql database to a variable
 const connection = mysql.createConnection({
     host: "localhost",
     port: 8889,
@@ -12,7 +14,7 @@ const connection = mysql.createConnection({
     database: "bamazon"
 });
 
-//Connects to the database
+//connects to the database
 connection.connect(function (err) {
     //if error, display error
     if (err) throw err;
@@ -54,7 +56,6 @@ function viewSales() {
     connection.query(query, function (err, res) {
         if (err) throw err;
 
-        // console.log(res);
         const table = new Table({
             head: ["ID", "Department", "Overhead Costs", "Product Sales", "Total Profit"],
             style: {
@@ -64,6 +65,7 @@ function viewSales() {
             }
         });
 
+        //creates table
         for (let i = 0; i < res.length; i++) {
             table.push(
                 [res[i].department_id, res[i].department_name, res[i].over_head_costs, res[i].product_sales, res[i].total_profit]
@@ -95,7 +97,7 @@ function addDepartment() {
             }, function (err, res) {
                 if (err) throw err;
 
-                console.log("Department added successfully!".cyan);
+                console.log("Department added successfully!".magenta);
 
                 continuePrompt();
             
@@ -104,7 +106,7 @@ function addDepartment() {
     });
     
 }
-
+//returns to main menu or exits application
 function continuePrompt() {
     inquirer.prompt([
         {
@@ -115,9 +117,9 @@ function continuePrompt() {
         }
     ]).then(function(input){
         if (input.backToStart === "Yes") {
-            selectAction();     
+            showQuestions();     
         } else {
-            console.log("Goodbye!");
+            console.log("Goodbye!".rainbow);
             process.exit();
         }
     })

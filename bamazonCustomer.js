@@ -1,9 +1,11 @@
+//modules
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 const Table = require("cli-table");
+const colors = require("colors");
 
 
-//Sets mysql database to a variable
+//sets mysql database to a variable
 const connection = mysql.createConnection({
     host: "localhost",
     port: 8889,
@@ -12,7 +14,7 @@ const connection = mysql.createConnection({
     database: "bamazon"
 });
 
-//Connects to the database
+//connects to the database
 connection.connect(function (err) {
     //if error, display error
     if (err) throw err;
@@ -21,6 +23,7 @@ connection.connect(function (err) {
     displayItems();
 });
 
+//display items
 function displayItems() {
     const query = "Select item_id, product_name, department_name, price FROM products";
     connection.query(query, function (err, res) {
@@ -30,12 +33,13 @@ function displayItems() {
         const table = new Table({
             head: ["ID", "Product Name", "Department", "Price"],
             style: {
-                head: ['magenta'],
+                head: ['cyan'],
                 compact: false,
                 colAligns: ["center"],
             }
         });
 
+        //creates table 
         for (let i = 0; i < res.length; i++) {
             table.push(
                 [res[i].item_id, res[i].product_name, res[i].department_name, res[i].price]
@@ -48,6 +52,7 @@ function displayItems() {
     })
 }
 
+//buy an item
 function buyItem() {
     inquirer.prompt([
         {
@@ -84,19 +89,21 @@ function buyItem() {
 
                 if (err) throw err;
 
+                //no response prompts user to enter a valid item number
                 else if (res.length === 0) {
-                    console.log("Item not found. Please enter a valid item number.");
+                    console.log("Item not found. Please enter a valid item number.".red);
                     displayItems();
                 }
 
+                //buy item if in stock
                 else if (res[0].stock_quantity >= quantity) {
                     let total = (quantity * res[0].price).toFixed(2);
                     let updatedQuantity = res[0].stock_quantity - quantity;
                     let productSales = res[0].price * quantity;
                     let product = res[0].product_name;
                     
-                    console.log(`Success! You bought ${quantity} ${product}s. Your total cost is ${total}.`);
-                    console.log("Thank you for shopping at Bamazon.")
+                    console.log(`Success! You bought ${quantity} ${product}s. Your total cost is ${total}.`.magenta);
+                    console.log("Thank you for shopping at Bamazon.".magenta);
 
                     connection.query("UPDATE products SET ? WHERE ?", [{
                         stock_quantity: updatedQuantity,
@@ -106,12 +113,11 @@ function buyItem() {
                     {
                         item_id: id
                     }], function(err,res){
-                        // console.log("Database updated");
                         
                         continuePrompt();
                     });
 
-                    // connection.end();
+                //item not in stock, prompt to choose another item
                 } else {
                     console.log("Insufficient quantity! Please choose another item.")
                     displayItems();
@@ -124,6 +130,7 @@ function buyItem() {
         });
 }
 
+//returns to main menu or exits application
 function continuePrompt() {
     inquirer.prompt([
         {
@@ -136,7 +143,7 @@ function continuePrompt() {
         if (input.backToStart === "Yes") {
             displayItems();     
         } else {
-            console.log("Goodbye!");
+            console.log("Goodbye!".rainbow);
             process.exit();
         }
     })

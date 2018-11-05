@@ -1,9 +1,11 @@
+//modules
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 const Table = require("cli-table");
+const colors = require("colors");
 
 
-//Sets mysql database to a variable
+//sets mysql database to a variable
 var connection = mysql.createConnection({
     host: "localhost",
     port: 8889,
@@ -12,7 +14,7 @@ var connection = mysql.createConnection({
     database: "bamazon"
 });
 
-//Connects to the database
+//connects to the database
 connection.connect(function (err) {
     //if error, display error
     if (err) throw err;
@@ -21,6 +23,7 @@ connection.connect(function (err) {
     selectAction();
 });
 
+//manager prompts
 function selectAction() {
     inquirer.prompt([
         {
@@ -56,6 +59,7 @@ function selectAction() {
     });
 };
 
+//view table of products
 function viewProducts() {
     
     const query = "SELECT item_id, product_name, department_name, price, stock_quantity FROM products";
@@ -86,6 +90,7 @@ function viewProducts() {
     })
 }
 
+//view items with low stock (less than 5 units)
 function viewLowStock() {
     
     const query = "SELECT item_id, product_name, stock_quantity FROM products WHERE stock_quantity < 5"
@@ -116,6 +121,7 @@ function viewLowStock() {
     })
 }
 
+//add stock to existing products
 function addStock() {
 
     inquirer.prompt([
@@ -163,6 +169,7 @@ function addStock() {
     })
 }
 
+//add a new product
 function addProduct() {
     inquirer.prompt ([
         {
@@ -214,6 +221,7 @@ function addProduct() {
         });    
 }
 
+//returns to main menu or exits application
 function continuePrompt() {
     inquirer.prompt([
         {
@@ -226,7 +234,7 @@ function continuePrompt() {
         if (input.backToStart === "Yes") {
             selectAction();     
         } else {
-            console.log("Goodbye!");
+            console.log("Goodbye!".rainbow);
             process.exit();
         }
     })
