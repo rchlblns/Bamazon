@@ -30,7 +30,7 @@ function displayItems() {
         const table = new Table({
             head: ["ID", "Product Name", "Department", "Price"],
             style: {
-                head: ['blue'],
+                head: ['magenta'],
                 compact: false,
                 colAligns: ["center"],
             }
@@ -84,12 +84,12 @@ function buyItem() {
 
                 if (err) throw err;
 
-                if (res.length === 0) {
+                else if (res.length === 0) {
                     console.log("Item not found. Please enter a valid item number.");
                     displayItems();
                 }
 
-                if (res[0].stock_quantity >= quantity) {
+                else if (res[0].stock_quantity >= quantity) {
                     let total = (quantity * res[0].price).toFixed(2);
                     let updatedQuantity = res[0].stock_quantity - quantity;
                     let productSales = res[0].price * quantity;
@@ -106,17 +106,38 @@ function buyItem() {
                     {
                         item_id: id
                     }], function(err,res){
-                        console.log("Database updated");
+                        // console.log("Database updated");
+                        
+                        continuePrompt();
                     });
 
                     // connection.end();
                 } else {
                     console.log("Insufficient quantity! Please choose another item.")
+                    displayItems();
                 }
-                displayItems();
+                
 
             })
 
         
         });
+}
+
+function continuePrompt() {
+    inquirer.prompt([
+        {
+            type: "list",
+            name: "backToStart",
+            message: "Do you want to continue shopping?",
+            choices: ["Yes", "No"],
+        }
+    ]).then(function(input){
+        if (input.backToStart === "Yes") {
+            displayItems();     
+        } else {
+            console.log("Goodbye!");
+            process.exit();
+        }
+    })
 }

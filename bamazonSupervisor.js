@@ -17,10 +17,11 @@ connection.connect(function (err) {
     //if error, display error
     if (err) throw err;
     console.log("connected as id " + connection.threadId);
-    //otherwise display items for sale
+    //otherwise show supervisor prompts
     showQuestions();
 });
 
+//supervisor prompts (viewing sales & adding depts)
 function showQuestions() {
     inquirer.prompt([
         {
@@ -45,6 +46,7 @@ function showQuestions() {
     });
 }
 
+//function for viewing sales
 function viewSales() {
 
     const query = "SELECT department_id, departments.department_name, over_head_costs, product_sales, (product_sales - over_head_costs) AS total_profit FROM departments, products WHERE departments.department_name=products.department_name";
@@ -56,7 +58,7 @@ function viewSales() {
         const table = new Table({
             head: ["ID", "Department", "Overhead Costs", "Product Sales", "Total Profit"],
             style: {
-                head: ['blue'],
+                head: ['magenta'],
                 compact: false,
                 colAligns: ["center"],
             }
@@ -67,13 +69,14 @@ function viewSales() {
                 [res[i].department_id, res[i].department_name, res[i].over_head_costs, res[i].product_sales, res[i].total_profit]
             );
         }
-        
+
         console.log(table.toString());
 
-        showQuestions();
+        continuePrompt();
     })
 }
 
+//function for adding departments
 function addDepartment() {
     inquirer.prompt([
         {
@@ -92,12 +95,30 @@ function addDepartment() {
             }, function (err, res) {
                 if (err) throw err;
 
-                console.log("Department added successfully!");
+                console.log("Department added successfully!".cyan);
 
-                showQuestions();
+                continuePrompt();
             
             }
         )
     });
     
+}
+
+function continuePrompt() {
+    inquirer.prompt([
+        {
+            type: "list",
+            name: "backToStart",
+            message: "Return to menu?",
+            choices: ["Yes", "No"],
+        }
+    ]).then(function(input){
+        if (input.backToStart === "Yes") {
+            selectAction();     
+        } else {
+            console.log("Goodbye!");
+            process.exit();
+        }
+    })
 }

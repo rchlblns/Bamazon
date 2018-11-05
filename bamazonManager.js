@@ -67,7 +67,7 @@ function viewProducts() {
         const table = new Table({
             head: ["ID", "Product Name", "Department", "Price", "Stock Quantity"],
             style: {
-                head: ['blue'],
+                head: ['magenta'],
                 compact: false,
                 colAligns: ["center"],
             }
@@ -81,7 +81,7 @@ function viewProducts() {
 
         console.log(table.toString());
 
-        selectAction();
+        continuePrompt();
 
     })
 }
@@ -97,7 +97,7 @@ function viewLowStock() {
         const table = new Table({
             head: ["ID", "Product Name", "Stock Quantity"],
             style: {
-                head: ['blue'],
+                head: ['magenta'],
                 compact: false,
                 colAligns: ["center"],
             }
@@ -111,7 +111,7 @@ function viewLowStock() {
 
         console.log(table.toString());
 
-        selectAction();
+        continuePrompt();
 
     })
 }
@@ -155,7 +155,7 @@ function addStock() {
 
                 if (err) throw err;
 
-                selectAction();
+                continuePrompt();
             })
 
         })
@@ -208,8 +208,26 @@ function addProduct() {
             }, function(err, res) {
                 if (err) throw err;
 
-                selectAction();
+                continuePrompt();
             });
 
         });    
+}
+
+function continuePrompt() {
+    inquirer.prompt([
+        {
+            type: "list",
+            name: "backToStart",
+            message: "Return to menu?",
+            choices: ["Yes", "No"],
+        }
+    ]).then(function(input){
+        if (input.backToStart === "Yes") {
+            selectAction();     
+        } else {
+            console.log("Goodbye!");
+            process.exit();
+        }
+    })
 }
