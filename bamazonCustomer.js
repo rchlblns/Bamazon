@@ -96,6 +96,7 @@ function buyItem() {
                     let product = res[0].product_name;
                     
                     console.log(`Success! You bought ${quantity} ${product}s. Your total cost is ${total}.`);
+                    console.log("Thank you for shopping at Bamazon.")
 
                     connection.query("UPDATE products SET ? WHERE ?", [{
                         stock_quantity: updatedQuantity,

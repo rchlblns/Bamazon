@@ -47,12 +47,29 @@ function showQuestions() {
 
 function viewSales() {
 
-    const query = "SELECT department_id AS department_id, department_name AS department_name," + "over_head_costs AS over_head_costs, total_sales AS total_sales," + "(total_sales - over_head_costs) AS total_profit FROM departments";
+    const query = "SELECT department_id, departments.department_name, over_head_costs, product_sales, (product_sales - over_head_costs) AS total_profit FROM departments, products WHERE departments.department_name=products.department_name";
 
     connection.query(query, function (err, res) {
         if (err) throw err;
 
-        console.table(res);
+        // console.log(res);
+        const table = new Table({
+            head: ["ID", "Department", "Overhead Costs", "Product Sales", "Total Profit"],
+            style: {
+                head: ['blue'],
+                compact: false,
+                colAligns: ["center"],
+            }
+        });
+
+        for (let i = 0; i < res.length; i++) {
+            table.push(
+                [res[i].department_id, res[i].department_name, res[i].over_head_costs, res[i].product_sales, res[i].total_profit]
+            );
+        }
+        
+        console.log(table.toString());
+
         showQuestions();
     })
 }
