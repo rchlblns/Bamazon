@@ -32,27 +32,55 @@ function showQuestions() {
                 "Create New Department"
             ]
         }
-    ]).then(function(input){
-        switch(input.option) {
+    ]).then(function (input) {
+        switch (input.option) {
             case "View Product Sales by Department":
-            viewSales();
-            break;
+                viewSales();
+                break;
 
             case "Create New Department":
-            addDepartment();
-            break;
+                addDepartment();
+                break;
         }
     });
-};
+}
 
 function viewSales() {
 
     const query = "SELECT department_id AS department_id, department_name AS department_name," + "over_head_costs AS over_head_costs, total_sales AS total_sales," + "(total_sales - over_head_costs) AS total_profit FROM departments";
 
-    connection.query(query, function(err,res){
+    connection.query(query, function (err, res) {
         if (err) throw err;
 
         console.table(res);
         showQuestions();
     })
+}
+
+function addDepartment() {
+    inquirer.prompt([
+        {
+            name: "department_name",
+            type: "input",
+            message: "What is the name of the department you're adding?"
+
+        }, {
+            name: "over_head_costs",
+            type: "input",
+            message: "What is the department's overhead costs?"
+        }]).then(function (input) {
+            connection.query("INSERT INTO departments SET ?", {
+                department_name: input.department_name,
+                over_head_costs: input.over_head_costs
+            }, function (err, res) {
+                if (err) throw err;
+
+                console.log("Department added successfully!");
+
+                showQuestions();
+            
+            }
+        )
+    });
+    
 }
